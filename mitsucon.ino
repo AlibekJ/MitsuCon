@@ -83,8 +83,8 @@ void mqttAutoDiscovery() {
   rootDiscovery["swing_mode_cmd_t"]    = "~/cmnd/vane";
   rootDiscovery["swing_mode_stat_t"]   = "~/tele/stat";
   rootDiscovery["swing_mode_stat_tpl"] = "{{ value_json.vane | lower }}";
-  rootDiscovery["act_t"]               = "~/tele/curr";
-  rootDiscovery["act_tpl"]             = "{%set hp='climate.'+value_json.name|lower|replace(' ','_')%}{%if states(hp)=='off'%}off{%elif states(hp)=='fan'%}fan{%elif value_json.operating==false%}idle{%elif states(hp)=='heat'%}heating{%elif states(hp)=='cool' %}cooling{%elif states(hp)=='dry' %}drying{%elif states(hp)=='heat_cool'and(state_attr(hp,'temperature')-state_attr(hp,'current_temperature')>0)%}heating{%elif states(hp)=='heat_cool'and(state_attr(hp,'temperature')-state_attr(hp,'current_temperature')<0)%}cooling{%endif%}";
+  rootDiscovery["act_t"]               = "~/tele/stat";
+  rootDiscovery["act_tpl"]             = "{%if value_json.power=='OFF'%}off{%elif value_json.mode=='HEAT'%}heating{%elif value_json.mode=='COOL'%}cooling{%elif value_json.mode=='DRY'%}drying{%elif value_json.mode=='FAN'%}fan{%elif value_json.mode=='AUTO'%}idle{%else%}idle{%endif%}";
 #ifdef _timersAttr
   rootDiscovery["json_attr_t"]         = "~/tele/attr";
 #endif
