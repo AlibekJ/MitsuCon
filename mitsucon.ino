@@ -84,7 +84,7 @@ void mqttAutoDiscovery() {
   rootDiscovery["swing_mode_stat_t"]   = "~/tele/stat";
   rootDiscovery["swing_mode_stat_tpl"] = "{{ value_json.vane | lower }}";
   rootDiscovery["act_t"]               = "~/tele/stat";
-  rootDiscovery["act_tpl"]             = "{%if value_json.power=='OFF'%}off{%elif value_json.mode=='FAN'%}fan{%elif value_json.operating==false%}idle{%elif value_json.mode=='HEAT'%}heating{%elif value_json.mode=='COOL'%}cooling{%elif value_json.mode=='DRY'%}drying{%elif value_json.mode=='AUTO'%}idle{%else%}idle{%endif%}";
+  rootDiscovery["act_tpl"]             = "{%if value_json.power=='OFF'%}off{%elif value_json.mode=='FAN'%}fan{%elif value_json.operating and value_json.mode=='HEAT'%}heating{%elif value_json.operating and value_json.mode=='COOL'%}cooling{%elif value_json.operating and value_json.mode=='DRY'%}drying{%else%}idle{%endif%}";
 #ifdef _timersAttr
   rootDiscovery["json_attr_t"]         = "~/tele/attr";
 #endif
