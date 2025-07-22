@@ -84,7 +84,7 @@ void mqttAutoDiscovery() {
   rootDiscovery["swing_mode_stat_t"]   = "~/tele/stat";
   rootDiscovery["swing_mode_stat_tpl"] = "{{ value_json.vane | lower }}";
   rootDiscovery["act_t"]               = "~/tele/stat";
-  rootDiscovery["act_tpl"]             = "{%if value_json.power=='OFF'%}off{%elif value_json.mode=='HEAT'%}heating{%elif value_json.mode=='COOL'%}cooling{%elif value_json.mode=='DRY'%}drying{%elif value_json.mode=='FAN'%}fan{%elif value_json.mode=='AUTO'%}idle{%else%}idle{%endif%}";
+  rootDiscovery["act_tpl"]             = "{%if value_json.power=='OFF'%}off{%elif value_json.mode=='FAN'%}fan{%elif value_json.operating==false%}idle{%elif value_json.mode=='HEAT'%}heating{%elif value_json.mode=='COOL'%}cooling{%elif value_json.mode=='DRY'%}drying{%elif value_json.mode=='AUTO'%}idle{%else%}idle{%endif%}";
 #ifdef _timersAttr
   rootDiscovery["json_attr_t"]         = "~/tele/attr";
 #endif
@@ -105,10 +105,11 @@ void mqttAutoDiscovery() {
 }
 
 void hpSettingsChanged() {
-  const size_t bufferSize = JSON_OBJECT_SIZE(6);
+  const size_t bufferSize = JSON_OBJECT_SIZE(7);
   DynamicJsonDocument root(bufferSize);
 
   heatpumpSettings currentSettings = hp.getSettings();
+  heatpumpStatus currentStatus = hp.getStatus();
 
   root["power"]       = currentSettings.power;
   root["mode"]        = currentSettings.mode;
@@ -116,6 +117,7 @@ void hpSettingsChanged() {
   root["fan"]         = currentSettings.fan;
   root["vane"]        = currentSettings.vane;
   root["wideVane"]    = currentSettings.wideVane;
+  root["operating"]   = currentStatus.operating;
 
   char buffer[512];
   serializeJson(root, buffer);
