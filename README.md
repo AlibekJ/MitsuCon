@@ -31,7 +31,7 @@ python3 ~/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/espota.py -i 
 ```
 
 ## Web interface
-Each controller serves a status/control page at `http://<controller>/`. Settings (WiFi, MQTT) and reboot at `/config` are open; firmware upload (`/update`) requires user `admin` with the OTA password.
+Each controller serves a status/control page at `http://<controller>/`. Temperatures can be shown in °C or °F (remembered per browser). Settings (WiFi, MQTT) and reboot at `/config` are open; firmware upload (`/update`) requires user `admin` with the OTA password.
 
 <img src="docs/screenshots/web-status.png" width="300" alt="Status and controls page"> <img src="docs/screenshots/web-settings.png" width="300" alt="Settings page">
 
@@ -44,7 +44,7 @@ Tested on Wemos D1 mini board with Home Assistant 0.96 and Mosquitto broker add-
 ## Known Issues
 * Sometimes heat pump unit turns off instead when send temperature changing command.
 * When change setting on HA UI, change will effect immediately but UI will delay for next data pull to refresh new status.
-* Cannot use imperial (fahrenheit) unit. Waiting for Home Assistant support soon.
+* The controller always works in Celsius. Home Assistant converts to °F automatically when its unit system is set to US customary, and the web interface has a °C/°F display toggle.
 
 ## Classic Code
 The Classic folder is a code proven to working well on Home Assistant < 0.100.0. It has 2 parts:

@@ -14,13 +14,16 @@ button{cursor:pointer}button.on{background:var(--acc);border-color:var(--acc);co
 .set{display:flex;align-items:center;gap:12px}.set b{font-size:32px;flex:1;text-align:center}.set button{flex:0 0 56px;font-size:22px}
 dl{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:0}dt{color:var(--mute)}dd{margin:0;text-align:right;overflow-wrap:anywhere}
 label{display:block;margin:10px 0 4px;color:var(--mute)}input{width:100%}a{color:var(--acc)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 16px}.top h1{margin:0}
+.seg{display:flex;flex:0 0 auto}.seg button{padding:5px 10px;border-radius:0}.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0;border-left:0}
 .heat{color:var(--hot)}.cool{color:var(--cold)}#msg{min-height:1.4em;color:var(--mute)}
 </style>
 )rawliteral";
 
 const char PAGE_INDEX[] PROGMEM = R"rawliteral(
 <main>
-<h1 id="name">Heat Pump</h1>
+<div class="top"><h1 id="name">Heat Pump</h1>
+ <div class="seg" id="units"><button data-u="C" onclick="setUnit('C')">&deg;C</button><button data-u="F" onclick="setUnit('F')">&deg;F</button></div></div>
 <div class="card"><h2>Room</h2>
  <div class="big"><b id="room">--</b><small id="action">--</small></div></div>
 <div class="card"><h2>Target</h2>
@@ -39,6 +42,16 @@ const FANS=['auto','quiet','1','2','3','4'],VANES=['auto','1','2','3','4','5','s
 let st=null,pending=null,timer=null;
 const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+// display unit only, the controller and Home Assistant always exchange Celsius
+let unit='C';try{unit=localStorage.getItem('unit')||'C'}catch(e){}
+const toF=c=>c*9/5+32;
+const fmt=c=>unit=='F'?Math.round(toF(c))+'\u00b0F':c.toFixed(1)+'\u00b0C';
+function setUnit(u){
+ unit=u;try{localStorage.setItem('unit',u)}catch(e){}
+ document.querySelectorAll('#units button').forEach(b=>b.classList.toggle('on',b.dataset.u==u));
+ if(st)render(st);if(pending!==null)$('target').textContent=fmt(pending);
+}
+setUnit(unit);
 $('modes').innerHTML=MODES.map(m=>`<button data-m="${m[0]}" onclick="send('mode','${m[0]}')">${m[1]}</button>`).join('');
 $('fan').innerHTML=FANS.map(f=>`<option value="${f}">Fan ${f}</option>`).join('');
 $('vane').innerHTML=VANES.map(v=>`<option value="${v}">Vane ${v}</option>`).join('');
@@ -49,9 +62,9 @@ function up(t){
 function render(s){
  st=s;const hp=s.hp;
  document.title=s.name;$('name').textContent=s.name;
- $('room').textContent=hp.connected&&hp.roomTemperature?hp.roomTemperature.toFixed(1)+'°':'--';
+ $('room').textContent=hp.connected&&hp.roomTemperature?fmt(hp.roomTemperature):'--';
  const a=hp.action;$('action').textContent=a;$('action').className=a=='heating'?'heat':a=='cooling'?'cool':'';
- if(pending===null)$('target').textContent=hp.temperature.toFixed(1)+'°';
+ if(pending===null)$('target').textContent=fmt(hp.temperature);
  document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m==hp.mode));
  if(document.activeElement!==$('fan'))$('fan').value=hp.fan;
  if(document.activeElement!==$('vane'))$('vane').value=hp.vane;
@@ -64,8 +77,14 @@ function render(s){
 }
 function step(dir){
  if(!st)return;const l=st.limits;
- let t=(pending===null?st.hp.temperature:pending)+dir*l.step;t=Math.min(l.max,Math.max(l.min,t));
- pending=t;$('target').textContent=t.toFixed(1)+'°';
+ const cur=pending===null?st.hp.temperature:pending;let t=cur+dir*l.step;
+ if(unit=='F'){
+  // step 1 degree F, send the nearest Celsius value the unit accepts
+  let f=Math.round(toF(cur));t=cur;
+  for(let i=0;i<6&&t==cur;i++){f+=dir;t=Math.round((f-32)*5/9/l.step)*l.step;}
+ }
+ t=Math.min(l.max,Math.max(l.min,t));
+ pending=t;$('target').textContent=fmt(t);
  clearTimeout(timer);timer=setTimeout(()=>{send('temp',pending);pending=null},800);
 }
 async function send(k,v){
