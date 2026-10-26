@@ -1,4 +1,5 @@
-// Copy to secrets.h and fill in. secrets.h is not committed.
+// Optional: copy to secrets.h to pre-fill settings at build time. secrets.h is not committed.
+// Anything left out can be entered later on the controller's web interface (/config).
 #define WIFI_SSID     "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
 #define MQTT_SERVER   "MQTT_SERVER_NAME_OR_IP"

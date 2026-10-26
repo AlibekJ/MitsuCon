@@ -56,8 +56,8 @@ function render(s){
  if(document.activeElement!==$('fan'))$('fan').value=hp.fan;
  if(document.activeElement!==$('vane'))$('vane').value=hp.vane;
  const rows=[['Heat pump link',hp.connected?'connected':'not connected'],['Compressor',hp.operating?'running':'idle'],
-  ['MQTT',s.mqtt.connected?'connected ('+s.mqtt.server+')':'disconnected'],
-  ['WiFi',s.wifi.connected?s.wifi.ssid+' ('+s.wifi.rssi+' dBm)':'not connected'],['IP',s.wifi.ip],
+  ['MQTT',!s.mqtt.server?'not configured':s.mqtt.connected?'connected ('+s.mqtt.server+')':'disconnected'],
+  ['WiFi',!s.wifi.ssid?'not configured':s.wifi.connected?s.wifi.ssid+' ('+s.wifi.rssi+' dBm)':'not connected'],['IP',s.wifi.ip],
   ['Fallback AP',s.wifi.ap?s.wifi.ap_ssid+' ('+s.wifi.ap_clients+' clients)':'off'],
   ['Uptime',up(s.uptime)],['Free memory',s.heap+' bytes'],['Last reset',s.reset],['Firmware',s.fw]];
  $('stats').innerHTML=rows.map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('');

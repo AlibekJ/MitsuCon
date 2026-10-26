@@ -1,8 +1,12 @@
 // Home Assistant Mitsubishi Electric Heat Pump Controller https://github.com/unixko/MitsuCon
 // using native MQTT Climate (HVAC) component with MQTT discovery for automatic configuration
 
-// Credentials live in secrets.h (not committed), copy secrets.example.h to start
-#include "secrets.h"
+// Optional build-time settings live in secrets.h (not committed), see secrets.example.h.
+// Without it the controller starts with empty WiFi/MQTT settings and opens the setup
+// access point, where they can be entered from the web interface.
+#if __has_include("secrets.h")
+  #include "secrets.h"
+#endif
 
 // Unit number, selects hostname/MQTT topic "heatpump<HP_ID>"
 // Build with: --build-property "build.extra_flags=-DHP_ID=1"
@@ -13,6 +17,25 @@
 #define _STR(x) #x
 #define STR(x) _STR(x)
 #define HP_NAME "heatpump" STR(HP_ID)
+
+#ifndef WIFI_SSID
+  #define WIFI_SSID     ""
+#endif
+#ifndef WIFI_PASSWORD
+  #define WIFI_PASSWORD ""
+#endif
+#ifndef MQTT_SERVER
+  #define MQTT_SERVER   ""
+#endif
+#ifndef MQTT_USER
+  #define MQTT_USER     HP_NAME
+#endif
+#ifndef MQTT_PASSWORD
+  #define MQTT_PASSWORD ""
+#endif
+#ifndef OTA_PASSWORD
+  #define OTA_PASSWORD  "mitsucon" // publicly known, set your own in secrets.h
+#endif
 
 // enable extra MQTT topic for debug/timer info
 bool _debugMode  = false;
@@ -60,7 +83,7 @@ const float max_temp                    = MAX_TEMP;  // Maximum temperature, che
 const float temp_step                   = TEMP_STEP; // Temperature setting step, check value from heatpump remote control
 const char* mqtt_discov_prefix          = "homeassistant"; // Home Assistant MQTT Discovery Prefix
 
-// fallback access point: opened when configured wifi is unreachable for this long
+// fallback access point: opened when configured wifi is unreachable for this long, or at boot when none is configured
 const char* ap_ssid                     = "MitsuCon-" HP_NAME; // open network, web interface at http://192.168.4.1
 const unsigned long WIFI_AP_FALLBACK_MS = 60000;
 

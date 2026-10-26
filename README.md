@@ -23,7 +23,7 @@ PubSubClient 2.7.0
 
 Edit file Arduino\libraries\PubSubClient\PubSubClient.h MQTT_MAX_PACKET_SIZE to 2048.
 
-Copy `mitsucon/secrets.example.h` to `mitsucon/secrets.h` and fill in credentials. The unit number selects hostname and MQTT topic (`heatpump0`, `heatpump1`, ...):
+Optionally copy `mitsucon/secrets.example.h` to `mitsucon/secrets.h` to pre-fill WiFi, MQTT and OTA settings at build time. Without it the firmware still builds, and settings are entered on the web interface after the first boot (see below). Without `secrets.h` the OTA and firmware upload password is `mitsucon`; set your own `OTA_PASSWORD` in `secrets.h`. The unit number selects hostname and MQTT topic (`heatpump0`, `heatpump1`, ...):
 
 ```
 arduino-cli compile --fqbn esp8266:esp8266:d1_mini:eesz=4M2M --build-property "build.extra_flags=-DHP_ID=1" --build-path build/hp1 mitsucon
@@ -37,7 +37,7 @@ Each controller serves a status/control page at `http://<controller>/`. Settings
 
 Thermostat limits advertised to Home Assistant default to 16–31 °C in 1° steps; override `MIN_TEMP`, `MAX_TEMP` and `TEMP_STEP` in `secrets.h` to match your remote control.
 
-If the configured WiFi is unreachable for 60 seconds the controller opens an open access point `MitsuCon-heatpump<N>`. Join it and browse to `http://192.168.4.1/config` to enter new credentials; the controller saves them and reboots. It keeps retrying the old network while nobody is connected to the access point, and closes the access point once it reconnects.
+If no WiFi is configured, or the configured WiFi is unreachable for 60 seconds, the controller opens an open access point `MitsuCon-heatpump<N>`. Join it and browse to `http://192.168.4.1/config` to enter new credentials; the controller saves them and reboots. It keeps retrying the old network while nobody is connected to the access point, and closes the access point once it reconnects.
 
 Tested on Wemos D1 mini board with Home Assistant 0.96 and Mosquitto broker add-on 5.0.
 

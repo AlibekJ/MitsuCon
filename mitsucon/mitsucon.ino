@@ -378,7 +378,7 @@ void wifiLoop() {
     if (apActive && WiFi.softAPgetStationNum() == 0) {
       stopAccessPoint();
     }
-  } else if (!apActive && millis() - lastWifiConnected > WIFI_AP_FALLBACK_MS) {
+  } else if (!apActive && (cfg.ssid[0] == '\0' || millis() - lastWifiConnected > WIFI_AP_FALLBACK_MS)) {
     startAccessPoint();
   }
 
@@ -390,7 +390,7 @@ void wifiLoop() {
         WiFi.disconnect();
         staPaused = true;
       }
-    } else if (staPaused) {
+    } else if (staPaused && cfg.ssid[0] != '\0') {
       WiFi.begin(cfg.ssid, cfg.pass);
       staPaused = false;
     }
@@ -605,7 +605,9 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.hostname(client_id);
   WiFi.setAutoReconnect(true);
-  WiFi.begin(cfg.ssid, cfg.pass);
+  if (cfg.ssid[0] != '\0') {
+    WiFi.begin(cfg.ssid, cfg.pass);
+  }
   lastWifiConnected = millis();
 
   mqtt_client.setServer(cfg.mqtt_server, cfg.mqtt_port);
@@ -635,7 +637,7 @@ void loop() {
   wifiLoop();
 
   if (WiFi.status() == WL_CONNECTED) {
-    if (!mqtt_client.connected()) {
+    if (cfg.mqtt_server[0] != '\0' && !mqtt_client.connected()) {
       mqttConnect();
     }
     mqtt_client.loop();
